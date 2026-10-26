@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.teamsloth</groupId>
+    <artifactId>ludo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId> <!-- JUnit 6's group -->
+            <artifactId>junit-jupiter</artifactId> <!-- API + engine in one artifact -->
+            <version>6.1.3</version> <!-- pin it so everyone gets the same version -->
+            <scope>test</scope>  <!-- only on the test classpath, never shipped in the JAR -->
+        </dependency>
+    </dependencies>
+
+    <build> <!-- configuration for how the project is built -->
+        <plugins>  <!-- list of build tools Maven runs -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId> <!-- official Maven plugins live under this group -->
+                <artifactId>maven-surefire-plugin</artifactId> <!-- the plugin that runs unit tests in the `test` phase -->
+                <version>3.6.0</version> <!-- pinned so every machine and CI uses the same version -->
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
