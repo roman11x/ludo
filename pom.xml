@@ -12,6 +12,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javafx.version>21.0.13</javafx.version> <!-- one place to change the JavaFX version; 21.x because JavaFX 25+ needs JDK 23 -->
     </properties>
 
     <dependencies>
@@ -21,6 +22,36 @@
             <version>6.1.3</version> <!-- pin it so everyone gets the same version -->
             <scope>test</scope>  <!-- only on the test classpath, never shipped in the JAR -->
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId> <!-- JavaFX's group -->
+            <artifactId>javafx-controls</artifactId> <!-- UI controls; brings javafx-base and javafx-graphics with it -->
+            <version>${javafx.version}</version> <!-- uses the property above -->
+        </dependency>
+        <!-- javafx-graphics holds the native code; one entry per OS so a single JAR runs everywhere -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>win</classifier> <!-- Windows natives -->
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>mac-aarch64</classifier> <!-- Apple Silicon natives -->
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>mac</classifier> <!-- Intel Mac natives, in case a grader uses one -->
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>linux</classifier> <!-- Linux natives -->
+        </dependency>
     </dependencies>
 
     <build> <!-- configuration for how the project is built -->
@@ -29,6 +60,43 @@
                 <groupId>org.apache.maven.plugins</groupId> <!-- official Maven plugins live under this group -->
                 <artifactId>maven-surefire-plugin</artifactId> <!-- the plugin that runs unit tests in the `test` phase -->
                 <version>3.6.0</version> <!-- pinned so every machine and CI uses the same version -->
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId> <!-- lets everyone run the app with ./mvnw javafx:run -->
+                <version>0.0.8</version> <!-- latest release -->
+                <configuration>
+                    <mainClass>View.Main</mainClass> <!-- class to start; must match the launcher you create -->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId> <!-- packs our code and all dependencies into one runnable JAR -->
+                <version>3.6.2</version> <!-- pinned like surefire -->
+                <executions>
+                    <execution>
+                        <phase>package</phase> <!-- runs during ./mvnw package -->
+                        <goals>
+                            <goal>shade</goal> <!-- the goal that builds the fat JAR -->
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact> <!-- apply to every dependency -->
+                                    <excludes>
+                                        <exclude>module-info.class</exclude> <!-- module descriptors don't belong in a fat JAR -->
+                                        <exclude>META-INF/versions/*/module-info.class</exclude> <!-- same, for multi-release JARs -->
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>View.Main</mainClass> <!-- written into the manifest so `java -jar` knows where to start -->
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
