@@ -31,7 +31,7 @@ public record PlayerSetup(String name, PlayerColor color) {
             throw new IllegalArgumentException("Player name cannot be null");
         }
         if (name.isBlank()) { // do not accept blank names
-            throw new IllegalArgumentException("Player name cannot be empty");
+            throw new IllegalArgumentException("Player name cannot be blank");
         }
         if (name.contains(",")) { // do not accept names with commas
             throw new IllegalArgumentException("Player name cannot contain commas");
