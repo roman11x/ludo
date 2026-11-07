@@ -8,17 +8,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static Model.HistoryWriter.nextGameID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class HistoryWriterTest {
 
+    private final String HEADER = "gameID,difficulty,"
+            + "timestamp(DD/MM/YYYY; HH:MM:SS),"
+            + "1st_place_name,2nd_place_name,3rd_place_name,4rd_place_name,"
+            + "game_duration(HH:MM:SS)";
+
     @Test
     void createsFileIfNotExists(@TempDir Path tempDir) throws IOException {
-        String expectedHeader = "gameID,difficulty,"
-                + "timestamp(DD/MM/YYYY; HH:MM:SS),"
-                + "1st_place_name,2nd_place_name,3rd_place_name,4rd_place_name,"
-                + "game_duration(HH:MM:SS)";
-
         // resolve(...) = "an address inside this folder"; the file isn't created yet
         Path file = tempDir.resolve("history.csv");
 
@@ -29,7 +30,7 @@ public class HistoryWriterTest {
         List<String> lines = Files.readAllLines(file);
 
         assertTrue(Files.exists(file));
-        assertEquals(expectedHeader, lines.getFirst());
+        assertEquals(HEADER, lines.getFirst());
         assertEquals(1, lines.size()); // make sure the file only has the header
     }
 
@@ -58,5 +59,36 @@ public class HistoryWriterTest {
 
         assertEquals("some content", lines.getFirst());
         assertEquals(1, lines.size()); // make sure the file only has the sample
+    }
+
+    @Test
+    void returnsOneIfThereAreNoRecords() {
+        var headerLine = List.of(HEADER);
+
+        var id = nextGameID(headerLine);
+
+        assertEquals(1, id);
+    }
+
+    @Test
+    void  returnsNextIdForSingleRecord() {
+        var records = List.of(HEADER,
+                "5,medium,07/11/2026; 15:57:00,Alice,Bob,Carol,Dan,00:30:00");
+
+        var id = nextGameID(records);
+
+        assertEquals(6, id);
+    }
+
+    @Test
+    void returnsNextIdFromHighestRecordId() {
+        var records = List.of(HEADER,
+                        "2,medium,07/11/2026; 15:57:00,Alice,Bob,Carol,Dan,00:30:00",
+                        "5,medium,07/11/2026; 15:57:00,Alice,Bob,Carol,Dan,00:30:00",
+                "1,medium,07/11/2026; 15:57:00,Alice,Bob,Carol,Dan,00:30:00");
+
+        var id = nextGameID(records);
+
+        assertEquals(6, id);
     }
 }

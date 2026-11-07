@@ -42,7 +42,7 @@ public class HistoryWriter {
      * @param history the history CSV lines; must contain at least the header as the first line
      * @return one greater than the highest game ID found, or 1 if there are no records
      */
-    int nextGameID(List<String> history) {
+    static int nextGameID(List<String> history) {
         int maxID = 0;
 
         // the first line is the header, so we take all lines except the first one
